@@ -52,7 +52,6 @@ func ProxyResponseHandler() func(*http.Response) error {
 
 			resolvedHostname := strings.Replace(CodeArtifactAuthInfo.Url, u.Host, hostname, -1)
 			newUrl := fmt.Sprintf("http://%s/", "localhost")
-			log.Printf("URI conversion %s -> %s", resolvedHostname, newUrl)
 
 			newResponseContent := strings.Replace(oldContentResponseStr, resolvedHostname, newUrl, -1)
 			newResponseContent = strings.Replace(newResponseContent, CodeArtifactAuthInfo.Url, newUrl, -1)
