@@ -1,10 +1,13 @@
 package tools
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -30,8 +33,40 @@ func ProxyResponseHandler() func(*http.Response) error {
 	return func(r *http.Response) error {
 		log.Printf("RES: %s \"%s\" %d \"%s\" \"%s\"", r.Request.RemoteAddr, r.Request.Method, r.StatusCode, r.Request.RequestURI, r.Request.UserAgent())
 
+		contentType := r.Header.Get("Content-Type")
+		log.Printf("%s", contentType)
+
+		// Do some quick fixes to the HTTP response for NPM install requests
+		// TODO: Get this actually working, it looks like the JSON responses provide the correct URLs via CURL, but not when using npm against it.
+		if strings.HasPrefix(r.Request.UserAgent(), "npm") {
+			if !strings.Contains(contentType, "application/json") {
+				return nil
+			}
+
+			// replace any instances of the CodeArtifact URL with the local URL
+			oldContentResponse, _ := ioutil.ReadAll(r.Body)
+			oldContentResponseStr := string(oldContentResponse)
+
+			u, _ := url.Parse(CodeArtifactAuthInfo.Url)
+			hostname := u.Host + ":443"
+
+			resolvedHostname := strings.Replace(CodeArtifactAuthInfo.Url, u.Host, hostname, -1)
+			newUrl := fmt.Sprintf("http://%s/", "localhost")
+			log.Printf("URI conversion %s -> %s", resolvedHostname, newUrl)
+
+			newResponseContent := strings.Replace(oldContentResponseStr, resolvedHostname, newUrl, -1)
+			newResponseContent = strings.Replace(newResponseContent, CodeArtifactAuthInfo.Url, newUrl, -1)
+
+			log.Print(newResponseContent)
+
+			r.Body = ioutil.NopCloser(strings.NewReader(newResponseContent))
+			r.ContentLength = int64(len(newResponseContent))
+			r.Header.Set("Content-Length", strconv.Itoa(len(newResponseContent)))
+		}
+
 		return nil
 	}
+
 }
 
 // ProxyInit initialises the CodeArtifact proxy and starts the HTTP listener
