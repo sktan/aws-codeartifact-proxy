@@ -10,16 +10,25 @@ Not every user who pulls code from your private codeartifact repository needs AW
 
 ## Features:
 
-Although I haven't been able to test them all (mostly because I don't use the languages), the proxy should support the following artifact types (replace `artifacts.example.com` with your deployed proxy hostname)
+Although I haven't been able to test them all, the proxy should support the following artifact types (replace `artifacts.example.com` with your deployed proxy hostname).
 
 | Repository Type | Tested | URL                                   |
 | --------------- | ------ | ------------------------------------- |
 | Pypi            | Yes    | https://artifacts.example.com/simple/ |
-| NPM             | Yes    | https://artifacts.example.com/        |
+| NPM             | No     | https://artifacts.example.com/        |
 | Maven           | No     | https://artifacts.example.com/        |
 | Nuget           | No     | https://artifacts.example.com/        |
 
-Currently we only support choosing a single repository at launch, athough maybe in the future I will look at auto-resovling the request and figure out which repository to use based on the useragent. This should simplify setup.
+Currently we only support choosing a single repository at launch, athough maybe in the future I will look at automatically figure out which repository to use based on the useragent. This should simplify setup.
+
+### Known Issues
+
+NPM support doesn't seem to be providing the correct results, it will connect to the proxy fine but respond with the CodeArtifact URL (which can't be access):
+
+```
+root ➜ /workspaces/aws-codeartifact-proxy/test (master ✗) $ npm view --registry http://localhost:8080 aws-cdk dist.tarball
+https://sktansandbox-1234567890.d.codeartifact.ap-southeast-2.amazonaws.com:443/npm/sandbox/aws-cdk/-/aws-cdk-2.19.0.tgz
+```
 
 ## How to Use?
 
@@ -29,11 +38,16 @@ You can run this in three easy ways.
 2. Use the container `sktan/aws-codeartifact-proxy` and run it on any capable host (AWS ECS, AWS EC2, Linux / Windows VM)
 3. Use the pre-built CDK template found in the `cdk` directory and deploy it to your environment (requires Python)
 
-By default, the proxy will choose to use the Pypi as it's type. If you would like to use a separate registry type, set your `CODEARTIFACT_TYPE` environment variable to one of the following:
-- pypi
-- npm
-- maven
-- nuget
+Configuration is done via Environment Variables:
+
+| Environment Variable |  Required? | Description             |
+| -------------------- | ---------- | ----------------------- |
+| CODEARTIFACT_REPO    | Yes        | Your CodeArtifact Repository Name (e.g. sandbox) |
+| CODEARTIFACT_DOMAIN  | Yes        | Your CodeArtifact Domain (e.g. sktansandbox) |
+| CODEARTIFACT_TYPE    | No         | Use one of the following: pypi, npm, maven, nuget |
+| CODEARTIFACT_OWNER   | No         | The AWS Account Id of the CodeArtifact Owner (if it's your own account, it can be empty) |
+
+By default, the proxy will choose to use the Pypi as it's type.
 
 Once you have started the proxy with valid AWS credentials (this uses the [default credential provider chain](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials)), you should receive similar output to this:
 
