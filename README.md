@@ -75,6 +75,38 @@ Successfully downloaded boto3
 2022/04/03 04:52:44 RES: 127.0.0.1:52066 "GET" 200 "/simple/boto3/" "pip/22.0.4 ...."
 ```
 
+### IAM Permissions
+
+Use the following permissions to grant the proxy ReadOnly access to the CodeArtifact repository.
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "codeartifact:Describe*",
+                "codeartifact:Get*",
+                "codeartifact:List*",
+                "codeartifact:ReadFromRepository"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "sts:GetServiceBearerToken",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "sts:AWSServiceName": "codeartifact.amazonaws.com"
+                }
+            }
+        }
+    ]
+}
+```
+
 ## Contributing
 
 If you'd like to contribute to this project, please feel free to raise a pull request. I would highly recommend using the devcontainer setup in this repo, as it will provide you a working development environment.
