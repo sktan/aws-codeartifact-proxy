@@ -1,0 +1,43 @@
+{
+    "build": {
+        "dockerfile": "Dockerfile",
+    },
+    "extensions": [
+        "eamodio.gitlens",
+        "golang.Go",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "GitHub.copilot",
+    ],
+    "mounts": [
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws/,target=/root/.aws,type=bind,consistency=cached"
+    ],
+    "remoteEnv": {
+        "AWS_DEFAULT_REGION": "ap-southeast-2",
+        "AWS_PROFILE": "sktansandbox",
+        "CODEARTIFACT_DOMAIN": "sktansandbox",
+        "CODEARTIFACT_REPO": "sandbox",
+    },
+    "features": {
+        // Used build and deploy docker containers
+        "docker-in-docker": {
+            "version": "latest",
+            "moby": true
+        },
+        // Used for AWS CLI (currently interferes with my gpg commits due to a bug)
+        // https://github.com/microsoft/vscode-dev-containers/pull/1391
+        // Comments will be removed once ^ has been merged
+        // "aws-cli": {
+        //     "version": "lts",
+        // },
+        // Testing out the proxy mechanism and for deploying via CDK
+        "python": {
+            "version": "lts",
+        },
+        "node": {
+            "version": "lts",
+            "nodeGypDependencies": true
+        }
+    },
+    "postCreateCommand": ".devcontainer/post_create.sh"
+}
