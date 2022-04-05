@@ -31,7 +31,6 @@ func Authenticate() {
 	}
 	svc := codeartifact.NewFromConfig(cfg)
 
-	// TODO: auto-resolve these via Environment variables
 	codeArtDomain := aws.String(os.Getenv("CODEARTIFACT_DOMAIN"))
 	codeArtOwner, codeArtOwnerFound := os.LookupEnv("CODEARTIFACT_OWNER")
 	codeArtRepos := aws.String(os.Getenv("CODEARTIFACT_REPO"))
