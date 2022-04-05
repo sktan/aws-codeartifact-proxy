@@ -48,6 +48,45 @@ Once you have started the proxy with valid AWS credentials (this uses the [defau
 2022/04/03 04:41:53 Requests will now be proxied to https://sktansandbox-1234567890.d.codeartifact.ap-southeast-2.amazonaws.com/pypi/sandbox/
 ```
 
+### Docker Examples
+
+Docker CLI:
+
+```
+docker run -v /root/.aws/:/.aws -e AWS_PROFILE=sktansandbox -e CODEARTIFACT_DOMAIN=sktansandbox -e CODEARTIFACT_REPO=sandbox -e CODEARTIFACT_TYPE=npm -p 8080:8080 sktan/aws-codeartifact-proxy
+```
+
+Docker Compose:
+
+```
+version: '3.1'
+
+services:
+  codeartifact-proxy:
+    image: sktan/aws-codeartifact-proxy
+    restart: always
+    volumes:
+      - /home/sktan/.aws/:/.aws
+    environment:
+      AWS_PROFILE: sktansandbox
+      CODEARTIFACT_DOMAIN: sktansandbox
+      CODEARTIFACT_REPO: sandbox
+      CODEARTIFACT_OWNER: 1234567890
+      CODEARTIFACT_TYPE: pypi
+    ports:
+      - 8080:8080
+```
+
+### AWS Example
+
+You will be able to use the CDK template in the `cdk` directory to create a Load Balancer, a fargate container and a CodeArtifact repository (if you desire).
+
+```
+# Currently TODO
+```
+
+## Testing Access
+
 And to test that it is working, using `pip` against the proxy should result in similar output:
 
 ```
@@ -64,6 +103,19 @@ Successfully downloaded boto3
 2022/04/03 04:52:44 REQ: 127.0.0.1:52066 GET "/simple/boto3/" "pip/22.0.4 ...."
 2022/04/03 04:52:44 Sending request to https://sktansandbox-1234567890.d.codeartifact.ap-southeast-2.amazonaws.com/pypi/sandbox/simple/boto3/
 2022/04/03 04:52:44 RES: 127.0.0.1:52066 "GET" 200 "/simple/boto3/" "pip/22.0.4 ...."
+```
+
+NPM output:
+```
+root ➜ /tmp (master ✗) $ npm  view --registry http://localhost:8080 axios dist.tarball
+http://localhost:8080/axios/-/axios-0.26.1.tgz
+
+root ➜ /tmp (master ✗) $ npm install --registry http://localhost:8080 axios
+
+added 2 packages in 2s
+
+1 package is looking for funding
+  run `npm fund` for details
 ```
 
 ### IAM Permissions
