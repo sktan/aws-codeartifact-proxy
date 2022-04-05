@@ -69,7 +69,6 @@ func ProxyResponseHandler() func(*http.Response) error {
 		}
 
 		// Do some quick fixes to the HTTP response for NPM install requests
-		// TODO: Get this actually working, it looks like the JSON responses provide the correct URLs via CURL, but not when using npm against it.
 		if strings.HasPrefix(r.Request.UserAgent(), "npm") {
 
 			// Respond to only requests that respond with JSON
