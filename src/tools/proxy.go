@@ -1,7 +1,9 @@
 package tools
 
 import (
+	"compress/gzip"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,9 +13,22 @@ import (
 	"strings"
 )
 
+var originalUrlResolver = make(map[string]*url.URL)
+
 // ProxyRequestHandler intercepts requests to CodeArtifact and add the Authorization header + correct Host header
 func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Store the original host header for each request
+		originalUrlResolver[r.RemoteAddr] = r.URL
+		originalUrlResolver[r.RemoteAddr].Host = r.Host
+		originalUrlResolver[r.RemoteAddr].Scheme = r.URL.Scheme
+
+		if r.Header.Get("X-Forwarded-Proto") == "https" {
+			originalUrlResolver[r.RemoteAddr].Scheme = "https"
+		} else {
+			originalUrlResolver[r.RemoteAddr].Scheme = "http"
+		}
+
 		// Override the Host header with the CodeArtifact Host
 		u, _ := url.Parse(CodeArtifactAuthInfo.Url)
 		r.Host = u.Host
@@ -31,32 +46,56 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 
 func ProxyResponseHandler() func(*http.Response) error {
 	return func(r *http.Response) error {
+		log.Printf("Received response from %s", r.Request.URL.String())
 		log.Printf("RES: %s \"%s\" %d \"%s\" \"%s\"", r.Request.RemoteAddr, r.Request.Method, r.StatusCode, r.Request.RequestURI, r.Request.UserAgent())
 
 		contentType := r.Header.Get("Content-Type")
-		log.Printf("%s", contentType)
+
+		originalUrl := originalUrlResolver[r.Request.RemoteAddr]
+		delete(originalUrlResolver, r.Request.RemoteAddr)
+
+		u, _ := url.Parse(CodeArtifactAuthInfo.Url)
+		hostname := u.Host + ":443"
+
+		// Rewrite the 301 to point from CodeArtifact URL to the proxy instead..
+		if r.StatusCode == 301 || r.StatusCode == 302 {
+			location, _ := r.Location()
+
+			location.Host = originalUrl.Host
+			location.Scheme = originalUrl.Scheme
+			location.Path = strings.Replace(location.Path, u.Path, "", 1)
+
+			r.Header.Set("Location", location.String())
+		}
 
 		// Do some quick fixes to the HTTP response for NPM install requests
 		// TODO: Get this actually working, it looks like the JSON responses provide the correct URLs via CURL, but not when using npm against it.
 		if strings.HasPrefix(r.Request.UserAgent(), "npm") {
-			if !strings.Contains(contentType, "application/json") {
+
+			// Respond to only requests that respond with JSON
+			// There might eventually be additional headers i don't know about?
+			if !strings.Contains(contentType, "application/json") && !strings.Contains(contentType, "application/vnd.npm.install-v1+json") {
 				return nil
 			}
 
+			var body io.ReadCloser
+
+			if r.Header.Get("Content-Encoding") == "gzip" {
+				body, _ = gzip.NewReader(r.Body)
+				r.Header.Del("Content-Encoding")
+			} else {
+				body = r.Body
+			}
+
 			// replace any instances of the CodeArtifact URL with the local URL
-			oldContentResponse, _ := ioutil.ReadAll(r.Body)
+			oldContentResponse, _ := ioutil.ReadAll(body)
 			oldContentResponseStr := string(oldContentResponse)
 
-			u, _ := url.Parse(CodeArtifactAuthInfo.Url)
-			hostname := u.Host + ":443"
-
 			resolvedHostname := strings.Replace(CodeArtifactAuthInfo.Url, u.Host, hostname, -1)
-			newUrl := fmt.Sprintf("http://%s/", "localhost")
+			newUrl := fmt.Sprintf("%s://%s/", originalUrl.Scheme, originalUrl.Host)
 
 			newResponseContent := strings.Replace(oldContentResponseStr, resolvedHostname, newUrl, -1)
 			newResponseContent = strings.Replace(newResponseContent, CodeArtifactAuthInfo.Url, newUrl, -1)
-
-			log.Print(newResponseContent)
 
 			r.Body = ioutil.NopCloser(strings.NewReader(newResponseContent))
 			r.ContentLength = int64(len(newResponseContent))
