@@ -15,20 +15,11 @@ Although I haven't been able to test them all, the proxy should support the foll
 | Repository Type | Tested | URL                                   |
 | --------------- | ------ | ------------------------------------- |
 | Pypi            | Yes    | https://artifacts.example.com/simple/ |
-| NPM             | No     | https://artifacts.example.com/        |
+| NPM             | Yes     | https://artifacts.example.com/        |
 | Maven           | No     | https://artifacts.example.com/        |
 | Nuget           | No     | https://artifacts.example.com/        |
 
 Currently we only support choosing a single repository at launch, athough maybe in the future I will look at automatically figure out which repository to use based on the useragent. This should simplify setup.
-
-### Known Issues
-
-NPM support doesn't seem to be providing the correct results, it will connect to the proxy fine but respond with the CodeArtifact URL (which can't be access):
-
-```
-root ➜ /workspaces/aws-codeartifact-proxy/test (master ✗) $ npm view --registry http://localhost:8080 aws-cdk dist.tarball
-https://sktansandbox-1234567890.d.codeartifact.ap-southeast-2.amazonaws.com:443/npm/sandbox/aws-cdk/-/aws-cdk-2.19.0.tgz
-```
 
 ## How to Use?
 

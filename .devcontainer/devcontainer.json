@@ -8,7 +8,12 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "GitHub.copilot",
+        "mutantdino.resourcemonitor"
     ],
+    "settings": {
+        "resmon.show.battery": false,
+        "resmon.show.cpufreq": false
+    },
     "mounts": [
         "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws/,target=/root/.aws,type=bind,consistency=cached"
     ],
