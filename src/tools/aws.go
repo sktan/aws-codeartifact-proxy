@@ -89,8 +89,14 @@ func Authenticate() {
 // CheckReauth checks if we have not yet authenticated, or need to authenticate within the next 15 minutes
 func CheckReauth() {
 	for {
-		if CodeArtifactAuthInfo.AuthorizationToken == "" || time.Now().Sub(CodeArtifactAuthInfo.LastAuth) > 45*time.Minute {
-			log.Printf("%d minutes until the CodeArtifact token expires, attempting a reauth.", time.Now().Sub(CodeArtifactAuthInfo.LastAuth)/time.Minute)
+		timeSince := time.Since(CodeArtifactAuthInfo.LastAuth).Minutes()
+		// Panic and shut down the proxy if we couldn't reauthenticate within the 15 minute window for some reason.
+		if timeSince > float64(60) {
+			log.Panic("Was unable to re-authenticate prior to our token expiring, shutting down proxty...")
+		}
+
+		if CodeArtifactAuthInfo.AuthorizationToken == "" || timeSince > float64(45) {
+			log.Printf("%f minutes until the CodeArtifact token expires, attempting a reauth.", 60-timeSince)
 			Authenticate()
 		}
 		// Sleep for 15 seconds for the next check
