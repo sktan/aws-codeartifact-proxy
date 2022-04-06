@@ -29,12 +29,8 @@
             "version": "latest",
             "moby": true
         },
-        // Used for AWS CLI (currently interferes with my gpg commits due to a bug)
-        // https://github.com/microsoft/vscode-dev-containers/pull/1391
-        // Comments will be removed once ^ has been merged
-        // "aws-cli": {
-        //     "version": "lts",
-        // },
+        // Used for AWS CLI
+        "aws-cli": "latest",
         // Testing out the proxy mechanism and for deploying via CDK
         "python": {
             "version": "lts",
