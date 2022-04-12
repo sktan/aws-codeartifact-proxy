@@ -1,6 +1,5 @@
 import aws_cdk as cdk
 from aws_cdk import (
-    Duration,
     Stack,
     aws_ecs as ecs,
     aws_ecs_patterns as ecs_patterns,
@@ -10,15 +9,15 @@ from aws_cdk import (
     aws_elasticloadbalancingv2 as elbv2,
     aws_certificatemanager as acm,
     aws_iam as iam,
-    aws_kms as kms,
 )
 from constructs import Construct
 
 
 class CodeArtifactProxy(Stack):
+    """A CDK stack that creates the resources required for a Code Artifact Proxy (deployed as a load balanced fargate service)"""
+
     __ecs_service: ecs_patterns.ApplicationLoadBalancedFargateService = None
     vpc: ec2.Vpc = None
-    __role_attached: bool = False
 
     domain_name: str = None
     repository_name: str = None
@@ -78,7 +77,6 @@ class CodeArtifactProxy(Stack):
                 },
             )
         )
-        self.__role_attached = True
 
     def create_code_artifact(self):
         """Creates a CodeArtifact repository"""
@@ -125,7 +123,9 @@ class CodeArtifactProxy(Stack):
             raise Exception(
                 "Both certificate_arn and certificate_ssm_parameter cannot be set"
             )
-        elif certificate_arn:
+
+        # Resolve the CDK certificate object via the certificate ARN or SSM parameter value
+        if certificate_arn:
             certificate = acm.Certificate.from_certificate_arn(
                 self, id="acm_certificate", certificate_arn=certificate_arn
             )
