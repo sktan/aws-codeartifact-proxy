@@ -77,12 +77,42 @@ services:
       - 8080:8080
 ```
 
-### AWS Example
+### AWS CDK Example
 
 You will be able to use the CDK template in the `cdk` directory to create a Load Balancer, a fargate container and a CodeArtifact repository (if you desire).
 
+Modify the variables in app.py (or copy the `cdk/code_artifact_proxy.py` file to your codebase).
+
 ```
-# Currently TODO
+root ➜ /workspaces/aws-codeartifact-proxy/cdk (cdk ✗) $ pipenv install
+Installing dependencies from Pipfile.lock (1a118d)...
+  🐍   ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ 0/0 — 00:00:00
+To activate this project's virtualenv, run pipenv shell.
+Alternatively, run a command inside the virtualenv with pipenv run.
+root ➜ /workspaces/aws-codeartifact-proxy/cdk (cdk ✗) $ pipenv run cdk deploy
+```
+
+If you'd rather use your own CDK codebase, you can use the following snippet in your `app.py` file:
+
+```
+# Replace me with where you have placed your codeartifact module
+from cdk.code_artifact_proxy import CodeArtifactProxy
+
+proxy = CodeArtifactProxy(
+    app,
+    "codeartifact-proxy",
+    # Replace the 3 lines below with your own values
+    domain_name="mycodeartifactdomain",
+    repository_name="internalrepo",
+    vpc_id="vpc-1234567",
+    env=cdk.Environment(
+        account=os.environ["CDK_DEFAULT_ACCOUNT"],
+        region=os.environ["CDK_DEFAULT_REGION"],
+    ),
+)
+
+proxy.create_code_artifact()
+proxy.create_loadbalanced_fargate()
 ```
 
 ## Testing Access
