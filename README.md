@@ -111,6 +111,7 @@ proxy = CodeArtifactProxy(
     ),
 )
 
+# This is actually optional if you do not already have a codeartifact repository
 proxy.create_code_artifact()
 proxy.create_loadbalanced_fargate()
 ```
