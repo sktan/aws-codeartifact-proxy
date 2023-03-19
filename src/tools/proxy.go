@@ -50,7 +50,7 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 
 func ProxyResponseHandler() func(*http.Response) error {
 	return func(r *http.Response) error {
-		log.Printf("Received response from %s", r.Request.URL.String())
+		log.Printf("Received %d response from %s", r.StatusCode, r.Request.URL.String())
 		log.Printf("RES: %s \"%s\" %d \"%s\" \"%s\"", r.Request.RemoteAddr, r.Request.Method, r.StatusCode, r.Request.RequestURI, r.Request.UserAgent())
 
 		contentType := r.Header.Get("Content-Type")
@@ -67,11 +67,15 @@ func ProxyResponseHandler() func(*http.Response) error {
 		if r.StatusCode == 301 || r.StatusCode == 302 {
 			location, _ := r.Location()
 
-			location.Host = originalUrl.Host
-			location.Scheme = originalUrl.Scheme
-			location.Path = strings.Replace(location.Path, u.Path, "", 1)
+			// Only attempt to rewrite the location if the host matches the CodeArtifact host
+			// Otherwise leave the original location intact (e.g a redirect to a S3 presigned URL)
+			if location.Host == u.Host {
+				location.Host = originalUrl.Host
+				location.Scheme = originalUrl.Scheme
+				location.Path = strings.Replace(location.Path, u.Path, "", 1)
 
-			r.Header.Set("Location", location.String())
+				r.Header.Set("Location", location.String())
+			}
 		}
 
 		// Do some quick fixes to the HTTP response for NPM install requests
