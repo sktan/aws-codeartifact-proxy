@@ -20,7 +20,6 @@ var mutex = &sync.Mutex{}
 // ProxyRequestHandler intercepts requests to CodeArtifact and add the Authorization header + correct Host header
 func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		mutex.Lock()
 		// Store the original host header for each request
 		originalUrlResolver[r.RemoteAddr] = r.URL
@@ -32,7 +31,6 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 		} else {
 			originalUrlResolver[r.RemoteAddr].Scheme = "http"
 		}
-		mutex.Unlock()
 
 		// Override the Host header with the CodeArtifact Host
 		u, _ := url.Parse(CodeArtifactAuthInfo.Url)
@@ -44,6 +42,7 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 		log.Printf("REQ: %s %s \"%s\" \"%s\"", r.RemoteAddr, r.Method, r.URL.RequestURI(), r.UserAgent())
 
 		log.Printf("Sending request to %s%s", strings.Trim(CodeArtifactAuthInfo.Url, "/"), r.URL.RequestURI())
+		mutex.Unlock()
 
 		p.ServeHTTP(w, r)
 	}
@@ -59,10 +58,10 @@ func ProxyResponseHandler() func(*http.Response) error {
 		mutex.Lock()
 		originalUrl := originalUrlResolver[r.Request.RemoteAddr]
 		delete(originalUrlResolver, r.Request.RemoteAddr)
-		mutex.Unlock()
 
 		u, _ := url.Parse(CodeArtifactAuthInfo.Url)
 		hostname := u.Host + ":443"
+		mutex.Unlock()
 
 		// Rewrite the 301 to point from CodeArtifact URL to the proxy instead..
 		if r.StatusCode == 301 || r.StatusCode == 302 {
@@ -97,11 +96,13 @@ func ProxyResponseHandler() func(*http.Response) error {
 			oldContentResponse, _ := ioutil.ReadAll(body)
 			oldContentResponseStr := string(oldContentResponse)
 
+			mutex.Lock()
 			resolvedHostname := strings.Replace(CodeArtifactAuthInfo.Url, u.Host, hostname, -1)
 			newUrl := fmt.Sprintf("%s://%s/", originalUrl.Scheme, originalUrl.Host)
 
 			newResponseContent := strings.Replace(oldContentResponseStr, resolvedHostname, newUrl, -1)
 			newResponseContent = strings.Replace(newResponseContent, CodeArtifactAuthInfo.Url, newUrl, -1)
+			mutex.Unlock()
 
 			r.Body = ioutil.NopCloser(strings.NewReader(newResponseContent))
 			r.ContentLength = int64(len(newResponseContent))

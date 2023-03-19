@@ -64,6 +64,8 @@ func Authenticate() {
 		log.Fatalf("unable to get authorization token, %v", authErr)
 	}
 	log.Printf("Authorization successful")
+
+	mutex.Lock()
 	CodeArtifactAuthInfo.AuthorizationToken = *authResp.AuthorizationToken
 	CodeArtifactAuthInfo.LastAuth = time.Now()
 
@@ -82,6 +84,7 @@ func Authenticate() {
 		log.Fatalf("unable to get repository endpoint, %v", urlErr)
 	}
 	CodeArtifactAuthInfo.Url = *urlResp.RepositoryEndpoint
+	mutex.Unlock()
 
 	log.Printf("Requests will now be proxied to %s", CodeArtifactAuthInfo.Url)
 }
@@ -91,11 +94,11 @@ func CheckReauth() {
 	for {
 		timeSince := time.Since(CodeArtifactAuthInfo.LastAuth).Minutes()
 		// Panic and shut down the proxy if we couldn't reauthenticate within the 15 minute window for some reason.
-		if timeSince > float64(60) {
+		if timeSince > float64(5) {
 			log.Panic("Was unable to re-authenticate prior to our token expiring, shutting down proxty...")
 		}
 
-		if CodeArtifactAuthInfo.AuthorizationToken == "" || timeSince > float64(45) {
+		if CodeArtifactAuthInfo.AuthorizationToken == "" || timeSince > float64(1) {
 			log.Printf("%f minutes until the CodeArtifact token expires, attempting a reauth.", 60-timeSince)
 			Authenticate()
 		}
