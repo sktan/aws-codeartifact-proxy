@@ -11,13 +11,16 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 var originalUrlResolver = make(map[string]*url.URL)
+var mutex = &sync.Mutex{}
 
 // ProxyRequestHandler intercepts requests to CodeArtifact and add the Authorization header + correct Host header
 func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		mutex.Lock()
 		// Store the original host header for each request
 		originalUrlResolver[r.RemoteAddr] = r.URL
 		originalUrlResolver[r.RemoteAddr].Host = r.Host
@@ -39,6 +42,7 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 		log.Printf("REQ: %s %s \"%s\" \"%s\"", r.RemoteAddr, r.Method, r.URL.RequestURI(), r.UserAgent())
 
 		log.Printf("Sending request to %s%s", strings.Trim(CodeArtifactAuthInfo.Url, "/"), r.URL.RequestURI())
+		mutex.Unlock()
 
 		p.ServeHTTP(w, r)
 	}
@@ -46,26 +50,32 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 
 func ProxyResponseHandler() func(*http.Response) error {
 	return func(r *http.Response) error {
-		log.Printf("Received response from %s", r.Request.URL.String())
+		log.Printf("Received %d response from %s", r.StatusCode, r.Request.URL.String())
 		log.Printf("RES: %s \"%s\" %d \"%s\" \"%s\"", r.Request.RemoteAddr, r.Request.Method, r.StatusCode, r.Request.RequestURI, r.Request.UserAgent())
 
 		contentType := r.Header.Get("Content-Type")
 
+		mutex.Lock()
 		originalUrl := originalUrlResolver[r.Request.RemoteAddr]
 		delete(originalUrlResolver, r.Request.RemoteAddr)
 
 		u, _ := url.Parse(CodeArtifactAuthInfo.Url)
 		hostname := u.Host + ":443"
+		mutex.Unlock()
 
 		// Rewrite the 301 to point from CodeArtifact URL to the proxy instead..
 		if r.StatusCode == 301 || r.StatusCode == 302 {
 			location, _ := r.Location()
 
-			location.Host = originalUrl.Host
-			location.Scheme = originalUrl.Scheme
-			location.Path = strings.Replace(location.Path, u.Path, "", 1)
+			// Only attempt to rewrite the location if the host matches the CodeArtifact host
+			// Otherwise leave the original location intact (e.g a redirect to a S3 presigned URL)
+			if location.Host == u.Host {
+				location.Host = originalUrl.Host
+				location.Scheme = originalUrl.Scheme
+				location.Path = strings.Replace(location.Path, u.Path, "", 1)
 
-			r.Header.Set("Location", location.String())
+				r.Header.Set("Location", location.String())
+			}
 		}
 
 		// Do some quick fixes to the HTTP response for NPM install requests
@@ -90,11 +100,13 @@ func ProxyResponseHandler() func(*http.Response) error {
 			oldContentResponse, _ := ioutil.ReadAll(body)
 			oldContentResponseStr := string(oldContentResponse)
 
+			mutex.Lock()
 			resolvedHostname := strings.Replace(CodeArtifactAuthInfo.Url, u.Host, hostname, -1)
 			newUrl := fmt.Sprintf("%s://%s/", originalUrl.Scheme, originalUrl.Host)
 
 			newResponseContent := strings.Replace(oldContentResponseStr, resolvedHostname, newUrl, -1)
 			newResponseContent = strings.Replace(newResponseContent, CodeArtifactAuthInfo.Url, newUrl, -1)
+			mutex.Unlock()
 
 			r.Body = ioutil.NopCloser(strings.NewReader(newResponseContent))
 			r.ContentLength = int64(len(newResponseContent))

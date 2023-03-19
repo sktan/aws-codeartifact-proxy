@@ -1,27 +1,31 @@
 {
     "build": {
-        "dockerfile": "Dockerfile",
+        "dockerfile": "Dockerfile"
     },
-    "extensions": [
-        "eamodio.gitlens",
-        "golang.Go",
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "GitHub.copilot",
-        "mutantdino.resourcemonitor"
-    ],
-    "settings": {
-        "resmon.show.battery": false,
-        "resmon.show.cpufreq": false
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "eamodio.gitlens",
+                "golang.Go",
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "GitHub.copilot",
+                "mutantdino.resourcemonitor"
+            ],
+            "settings": {
+                "resmon.show.battery": false,
+                "resmon.show.cpufreq": false
+            }
+        }
     },
     "mounts": [
-        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws/,target=/root/.aws,type=bind,consistency=cached"
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws/,target=/home/vscode/.aws,type=bind,consistency=cached"
     ],
     "remoteEnv": {
         "AWS_DEFAULT_REGION": "ap-southeast-2",
         "AWS_PROFILE": "sktansandbox",
         "CODEARTIFACT_DOMAIN": "sktansandbox",
-        "CODEARTIFACT_REPO": "sandbox",
+        "CODEARTIFACT_REPO": "sandbox"
     },
     "features": {
         // Used build and deploy docker containers
@@ -33,7 +37,7 @@
         "aws-cli": "latest",
         // Testing out the proxy mechanism and for deploying via CDK
         "python": {
-            "version": "lts",
+            "version": "lts"
         },
         "node": {
             "version": "lts",

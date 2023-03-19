@@ -64,6 +64,8 @@ func Authenticate() {
 		log.Fatalf("unable to get authorization token, %v", authErr)
 	}
 	log.Printf("Authorization successful")
+
+	mutex.Lock()
 	CodeArtifactAuthInfo.AuthorizationToken = *authResp.AuthorizationToken
 	CodeArtifactAuthInfo.LastAuth = time.Now()
 
@@ -82,6 +84,7 @@ func Authenticate() {
 		log.Fatalf("unable to get repository endpoint, %v", urlErr)
 	}
 	CodeArtifactAuthInfo.Url = *urlResp.RepositoryEndpoint
+	mutex.Unlock()
 
 	log.Printf("Requests will now be proxied to %s", CodeArtifactAuthInfo.Url)
 }
