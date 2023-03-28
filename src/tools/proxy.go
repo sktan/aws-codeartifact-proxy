@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -125,13 +126,23 @@ func ProxyInit() {
 		panic(err)
 	}
 
+	// Get port from LISTEN_PORT environment variable. If not set, default to 8080.
+	port := getEnv("LISTEN_PORT", "8080")
+
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 
 	proxy.ModifyResponse = ProxyResponseHandler()
 
 	http.HandleFunc("/", ProxyRequestHandler(proxy))
-	err = http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }

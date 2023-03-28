@@ -37,6 +37,7 @@ Configuration is done via Environment Variables:
 | CODEARTIFACT_DOMAIN  | Yes        | Your CodeArtifact Domain (e.g. sktansandbox) |
 | CODEARTIFACT_TYPE    | No         | Use one of the following: pypi, npm, maven, nuget |
 | CODEARTIFACT_OWNER   | No         | The AWS Account Id of the CodeArtifact Owner (if it's your own account, it can be empty) |
+| LISTEN_PORT          | No         | Port on which the proxy should listen.  Defaults to 8080 |
 
 By default, the proxy will choose to use the Pypi as it's type.
 
