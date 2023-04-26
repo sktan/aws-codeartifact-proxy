@@ -1,6 +1,7 @@
 # AWS Code Artifact Proxy
 
 An AWS Code Artifact Proxy that allows you to point your package managers to Code Artifact without the need of managing credentials.
+
 ## Why was this built?
 
 Not every user who pulls code from your private codeartifact repository needs AWS credentials:
@@ -15,7 +16,7 @@ Although I haven't been able to test them all, the proxy should support the foll
 | Repository Type | Tested | URL                                   |
 | --------------- | ------ | ------------------------------------- |
 | Pypi            | Yes    | https://artifacts.example.com/simple/ |
-| NPM             | Yes     | https://artifacts.example.com/        |
+| NPM             | Yes    | https://artifacts.example.com/        |
 | Maven           | No     | https://artifacts.example.com/        |
 | Nuget           | No     | https://artifacts.example.com/        |
 
@@ -31,15 +32,15 @@ You can run this in three easy ways.
 
 Configuration is done via Environment Variables:
 
-| Environment Variable |  Required? | Description             |
-| -------------------- | ---------- | ----------------------- |
-| CODEARTIFACT_REPO    | Yes        | Your CodeArtifact Repository Name (e.g. sandbox) |
-| CODEARTIFACT_DOMAIN  | Yes        | Your CodeArtifact Domain (e.g. sktansandbox) |
-| CODEARTIFACT_TYPE    | No         | Use one of the following: pypi, npm, maven, nuget |
-| CODEARTIFACT_OWNER   | No         | The AWS Account Id of the CodeArtifact Owner (if it's your own account, it can be empty) |
-| LISTEN_PORT          | No         | Port on which the proxy should listen.  Defaults to 8080 |
+| Environment Variable  |  Required? | Description             |
+| --------------------  | ---------- | ----------------------- |
+| `CODEARTIFACT_REPO`   | Yes        | Your CodeArtifact Repository Name (e.g. sandbox) |
+| `CODEARTIFACT_DOMAIN` | Yes        | Your CodeArtifact Domain (e.g. sktansandbox) |
+| `CODEARTIFACT_TYPE`   | No         | Use one of the following: pypi, npm, maven, nuget |
+| `CODEARTIFACT_OWNER`  | No         | The AWS Account ID of the CodeArtifact Owner (if it's your own account, it can be empty) |
+| `LISTEN_PORT`         | No         | Port on which the proxy should listen.  Defaults to 8080 |
 
-By default, the proxy will choose to use the Pypi as it's type.
+By default, the proxy will choose to use the Pypi as its type.
 
 Once you have started the proxy with valid AWS credentials (this uses the [default credential provider chain](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials)), you should receive similar output to this:
 
@@ -59,7 +60,7 @@ docker run -v /root/.aws/:/.aws -e AWS_PROFILE=sktansandbox -e CODEARTIFACT_DOMA
 
 Docker Compose:
 
-```
+```yaml
 version: '3.1'
 
 services:
@@ -95,7 +96,7 @@ root ➜ /workspaces/aws-codeartifact-proxy/cdk (cdk ✗) $ pipenv run cdk deplo
 
 If you'd rather use your own CDK codebase, you can use the following snippet in your `app.py` file:
 
-```
+```python
 # Replace me with where you have placed your codeartifact module
 from cdk.code_artifact_proxy import CodeArtifactProxy
 
@@ -154,7 +155,7 @@ added 2 packages in 2s
 
 Use the following permissions to grant the proxy ReadOnly access to the CodeArtifact repository.
 
-```
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
