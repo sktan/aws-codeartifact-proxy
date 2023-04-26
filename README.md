@@ -60,7 +60,7 @@ docker run -v /root/.aws/:/.aws -e AWS_PROFILE=sktansandbox -e CODEARTIFACT_DOMA
 
 Docker Compose:
 
-```
+```yaml
 version: '3.1'
 
 services:
@@ -96,7 +96,7 @@ root ➜ /workspaces/aws-codeartifact-proxy/cdk (cdk ✗) $ pipenv run cdk deplo
 
 If you'd rather use your own CDK codebase, you can use the following snippet in your `app.py` file:
 
-```
+```python
 # Replace me with where you have placed your codeartifact module
 from cdk.code_artifact_proxy import CodeArtifactProxy
 
@@ -155,7 +155,7 @@ added 2 packages in 2s
 
 Use the following permissions to grant the proxy ReadOnly access to the CodeArtifact repository.
 
-```
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
