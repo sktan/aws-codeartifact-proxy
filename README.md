@@ -40,7 +40,7 @@ Configuration is done via Environment Variables:
 | `CODEARTIFACT_OWNER`  | No         | The AWS Account ID of the CodeArtifact Owner (if it's your own account, it can be empty) |
 | `LISTEN_PORT`         | No         | Port on which the proxy should listen.  Defaults to 8080 |
 
-By default, the proxy will choose to use the Pypi as it's type.
+By default, the proxy will choose to use the Pypi as its type.
 
 Once you have started the proxy with valid AWS credentials (this uses the [default credential provider chain](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials)), you should receive similar output to this:
 
