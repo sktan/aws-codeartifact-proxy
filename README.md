@@ -1,6 +1,7 @@
 # AWS Code Artifact Proxy
 
 An AWS Code Artifact Proxy that allows you to point your package managers to Code Artifact without the need of managing credentials.
+
 ## Why was this built?
 
 Not every user who pulls code from your private codeartifact repository needs AWS credentials:
@@ -15,7 +16,7 @@ Although I haven't been able to test them all, the proxy should support the foll
 | Repository Type | Tested | URL                                   |
 | --------------- | ------ | ------------------------------------- |
 | Pypi            | Yes    | https://artifacts.example.com/simple/ |
-| NPM             | Yes     | https://artifacts.example.com/        |
+| NPM             | Yes    | https://artifacts.example.com/        |
 | Maven           | No     | https://artifacts.example.com/        |
 | Nuget           | No     | https://artifacts.example.com/        |
 
@@ -31,13 +32,13 @@ You can run this in three easy ways.
 
 Configuration is done via Environment Variables:
 
-| Environment Variable |  Required? | Description             |
-| -------------------- | ---------- | ----------------------- |
-| CODEARTIFACT_REPO    | Yes        | Your CodeArtifact Repository Name (e.g. sandbox) |
-| CODEARTIFACT_DOMAIN  | Yes        | Your CodeArtifact Domain (e.g. sktansandbox) |
-| CODEARTIFACT_TYPE    | No         | Use one of the following: pypi, npm, maven, nuget |
-| CODEARTIFACT_OWNER   | No         | The AWS Account Id of the CodeArtifact Owner (if it's your own account, it can be empty) |
-| LISTEN_PORT          | No         | Port on which the proxy should listen.  Defaults to 8080 |
+| Environment Variable  |  Required? | Description             |
+| --------------------  | ---------- | ----------------------- |
+| `CODEARTIFACT_REPO`   | Yes        | Your CodeArtifact Repository Name (e.g. sandbox) |
+| `CODEARTIFACT_DOMAIN` | Yes        | Your CodeArtifact Domain (e.g. sktansandbox) |
+| `CODEARTIFACT_TYPE`   | No         | Use one of the following: pypi, npm, maven, nuget |
+| `CODEARTIFACT_OWNER`  | No         | The AWS Account ID of the CodeArtifact Owner (if it's your own account, it can be empty) |
+| `LISTEN_PORT`         | No         | Port on which the proxy should listen.  Defaults to 8080 |
 
 By default, the proxy will choose to use the Pypi as it's type.
 
