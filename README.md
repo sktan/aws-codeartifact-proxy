@@ -24,11 +24,15 @@ Currently we only support choosing a single repository at launch, athough maybe 
 
 ## How to Use?
 
-You can run this in three easy ways.
+There are a variety of options for running `aws-codeartifact-proxy`:
 
-1. Download the release from the Github page, and run it on any linux server.
-2. Use the container `sktan/aws-codeartifact-proxy` and run it on any capable host (AWS ECS, AWS EC2, Linux / Windows VM)
-3. Use the pre-built CDK template found in the `cdk` directory and deploy it to your environment (requires Python)
+- Download the release from the Github page and run it directly on any Linux server.
+- Run the container `sktan/aws-codeartifact-proxy` on any capable host (AWS ECS, AWS EC2, Linux / Windows VM)
+  - The [`cdk` directory](./cdk) contains a CDK template for deployment to AWS (requires Python)
+- Run as a [Nix flake](https://nixos.wiki/wiki/Flakes):
+  ```shell
+  nix run github:sktan/aws-codeartifact-proxy
+  ```
 
 Configuration is done via Environment Variables:
 
