@@ -18,7 +18,6 @@ Although I haven't been able to test them all, the proxy should support the foll
 | Pypi            | Yes    | https://artifacts.example.com/simple/ |
 | NPM             | Yes    | https://artifacts.example.com/        |
 | Maven           | No     | https://artifacts.example.com/        |
-| Nuget           | No     | https://artifacts.example.com/        |
 
 Currently we only support choosing a single repository at launch, athough maybe in the future I will look at automatically figure out which repository to use based on the useragent. This should simplify setup.
 
@@ -40,7 +39,7 @@ Configuration is done via Environment Variables:
 | --------------------  | ---------- | ----------------------- |
 | `CODEARTIFACT_REPO`   | Yes        | Your CodeArtifact Repository Name (e.g. sandbox) |
 | `CODEARTIFACT_DOMAIN` | Yes        | Your CodeArtifact Domain (e.g. sktansandbox) |
-| `CODEARTIFACT_TYPE`   | No         | Use one of the following: pypi, npm, maven, nuget |
+| `CODEARTIFACT_TYPE`   | No         | Use one of the following: pypi, npm, maven |
 | `CODEARTIFACT_OWNER`  | No         | The AWS Account ID of the CodeArtifact Owner (if it's your own account, it can be empty) |
 | `LISTEN_PORT`         | No         | Port on which the proxy should listen.  Defaults to 8080 |
 
