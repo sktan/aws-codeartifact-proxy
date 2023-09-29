@@ -21,7 +21,9 @@ jobs:
       - name: Github Release
         uses: softprops/action-gh-release@v1
         with:
-          files: aws-codeartifact-proxy-x86_64 aws-codeartifact-proxy-arm64
+          files: |
+            aws-codeartifact-proxy-x86_64
+            aws-codeartifact-proxy-arm64
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
