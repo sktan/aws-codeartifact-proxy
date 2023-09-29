@@ -14,12 +14,14 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '^1.18.0'
-      - name: Build
-        run: cd src && CGO_ENABLED=0 go build -ldflags '-extldflags "-static"' -tags timetzdata -o ../aws-codeartifact-proxy
+      - name: Build x86_64
+        run: cd src && CGO_ENABLED=0 go build -ldflags '-extldflags "-static"' -tags timetzdata -o ../aws-codeartifact-proxy-x86_64
+      - name: Build arm64
+        run: cd src && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags '-extldflags "-static"' -tags timetzdata -o ../aws-codeartifact-proxy-arm64
       - name: Github Release
         uses: softprops/action-gh-release@v1
         with:
-          files: aws-codeartifact-proxy
+          files: aws-codeartifact-proxy-x86_64 aws-codeartifact-proxy-arm64
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
