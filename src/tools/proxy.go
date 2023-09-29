@@ -80,7 +80,7 @@ func ProxyResponseHandler() func(*http.Response) error {
 		}
 
 		// Do some quick fixes to the HTTP response for NPM install requests
-		if strings.HasPrefix(r.Request.UserAgent(), "npm") {
+		if strings.HasPrefix(r.Request.UserAgent(), "npm") || strings.HasPrefix(r.Request.UserAgent(), "pnpm") {
 
 			// Respond to only requests that respond with JSON
 			// There might eventually be additional headers i don't know about?
