@@ -49,6 +49,7 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 	}
 }
 
+// Handles the response back to the client once intercepted from CodeArtifact
 func ProxyResponseHandler() func(*http.Response) error {
 	return func(r *http.Response) error {
 		log.Printf("Received %d response from %s", r.StatusCode, r.Request.URL.String())
@@ -80,7 +81,10 @@ func ProxyResponseHandler() func(*http.Response) error {
 		}
 
 		// Do some quick fixes to the HTTP response for NPM install requests
-		if strings.HasPrefix(r.Request.UserAgent(), "npm") || strings.HasPrefix(r.Request.UserAgent(), "pnpm") {
+		// Also support for pnpm and bun
+		if strings.HasPrefix(r.Request.UserAgent(), "npm") ||
+			strings.HasPrefix(r.Request.UserAgent(), "pnpm") ||
+			strings.HasPrefix(r.Request.UserAgent(), "Bun") {
 
 			// Respond to only requests that respond with JSON
 			// There might eventually be additional headers i don't know about?
