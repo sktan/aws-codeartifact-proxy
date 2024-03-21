@@ -13,15 +13,35 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+var proxyRequestCounter = prometheus.NewCounter(
+   prometheus.CounterOpts{
+       Name: "proxy_request_counter",       
+   },
+)
+var proxyResponseCounter = prometheus.NewCounter(
+   prometheus.CounterOpts{
+       Name: "proxy_response_counter",       
+   },
 )
 
 var originalUrlResolver = make(map[string]*url.URL)
 var mutex = &sync.Mutex{}
 
+func init() {
+    // Register Prometheus metrics collectors
+    prometheus.MustRegister(proxyRequestCounter)
+    prometheus.MustRegister(proxyResponseCounter)
+}
+
 // ProxyRequestHandler intercepts requests to CodeArtifact and add the Authorization header + correct Host header
 func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		mutex.Lock()
+		mutex.Lock()		
 		// Store the original host header for each request
 		originalUrlResolver[r.RemoteAddr] = r.URL
 		originalUrlResolver[r.RemoteAddr].Host = r.Host
@@ -32,6 +52,10 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 		} else {
 			originalUrlResolver[r.RemoteAddr].Scheme = "http"
 		}
+		// Set URL with an updated path based on the request
+		log.Printf("baseURL  %s", CodeArtifactAuthInfo.Url)
+		CodeArtifactAuthInfo.Url = fmt.Sprintf("%s/%s", extractBaseURL(CodeArtifactAuthInfo.Url), strings.TrimPrefix(r.URL.Path, "/"))
+		log.Printf("newURL  %s", CodeArtifactAuthInfo.Url)
 
 		// Override the Host header with the CodeArtifact Host
 		u, _ := url.Parse(CodeArtifactAuthInfo.Url)
@@ -44,14 +68,26 @@ func ProxyRequestHandler(p *httputil.ReverseProxy) func(http.ResponseWriter, *ht
 
 		log.Printf("Sending request to %s%s", strings.Trim(CodeArtifactAuthInfo.Url, "/"), r.URL.RequestURI())
 		mutex.Unlock()
-
+		proxyRequestCounter.Inc()
+		remote, err := url.Parse(extractBaseURL(CodeArtifactAuthInfo.Url))
+		if err != nil {
+			panic(err)
+		}		
+		p := httputil.NewSingleHostReverseProxy(remote)
+		p.ModifyResponse = ProxyResponseHandler()
 		p.ServeHTTP(w, r)
 	}
 }
 
+// Function to extract the base URL
+func extractBaseURL(fullURL string) string {
+	u, _ := url.Parse(fullURL)
+	return fmt.Sprintf("%s://%s", u.Scheme, u.Host)
+}
+
 // Handles the response back to the client once intercepted from CodeArtifact
 func ProxyResponseHandler() func(*http.Response) error {
-	return func(r *http.Response) error {
+	return func(r *http.Response) error {		
 		log.Printf("Received %d response from %s", r.StatusCode, r.Request.URL.String())
 		log.Printf("RES: %s \"%s\" %d \"%s\" \"%s\"", r.Request.RemoteAddr, r.Request.Method, r.StatusCode, r.Request.RequestURI, r.Request.UserAgent())
 
@@ -116,12 +152,15 @@ func ProxyResponseHandler() func(*http.Response) error {
 			r.Body = ioutil.NopCloser(strings.NewReader(newResponseContent))
 			r.ContentLength = int64(len(newResponseContent))
 			r.Header.Set("Content-Length", strconv.Itoa(len(newResponseContent)))
+			proxyResponseCounter.Inc()
 		}
 
 		return nil
 	}
 
 }
+
+
 
 // ProxyInit initialises the CodeArtifact proxy and starts the HTTP listener
 func ProxyInit() {
@@ -136,7 +175,7 @@ func ProxyInit() {
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 
 	proxy.ModifyResponse = ProxyResponseHandler()
-
+	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/", ProxyRequestHandler(proxy))
 	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
