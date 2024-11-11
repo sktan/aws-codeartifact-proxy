@@ -84,6 +84,7 @@ func ProxyResponseHandler() func(*http.Response) error {
 		// Also support for pnpm and bun
 		if strings.HasPrefix(r.Request.UserAgent(), "npm") ||
 			strings.HasPrefix(r.Request.UserAgent(), "pnpm") ||
+			strings.HasPrefix(r.Request.UserAgent(), "yarn") ||
 			strings.HasPrefix(r.Request.UserAgent(), "Bun") {
 
 			// Respond to only requests that respond with JSON
