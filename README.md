@@ -185,6 +185,42 @@ Use the following permissions to grant the proxy ReadOnly access to the CodeArti
     ]
 }
 ```
+## Metrics
+
+Supporting prometheus counters : 
+```
+proxy_request_counter
+proxy_response_counter
+aws_auth_error_counter
+aws_url_error_counter
+aws_config_error_counter
+```
+Prometheus endpoint is 8080 on /metrics
+
+## Multiple path support
+
+It is dynamic url creation based on the request , supporting multiple paths. 
+
+CodeArtifactAuthInfo.Url = fmt.Sprintf("%s/%s", extractBaseURL(CodeArtifactAuthInfo.Url), strings.TrimPrefix(r.URL.Path, "/"))
+
+## Kubernetes deployments
+
+svc.yaml and deployment.yaml which are found in deploy/kubernetes can be used to deploy.
+
+The below env var should be set
+```
+        - name: CODEARTIFACT_DOMAIN
+          value: ""
+        - name: CODEARTIFACT_REPO
+          value: ""
+        - name: CODEARTIFACT_OWNER
+          value: ""
+        - name: CODEARTIFACT_TYPE
+          value: ""
+        - name: AWS_REGION
+          value: ""
+```
+
 
 ## Contributing
 

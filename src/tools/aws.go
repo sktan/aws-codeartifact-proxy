@@ -10,7 +10,33 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/codeartifact"
 	"github.com/aws/aws-sdk-go-v2/service/codeartifact/types"
+	"github.com/prometheus/client_golang/prometheus"
 )
+
+var awsAuthErrCounter = prometheus.NewCounter(
+   prometheus.CounterOpts{
+       Name: "aws_auth_error_counter",       
+   },
+)
+
+var awsUrlErrCounter = prometheus.NewCounter(
+   prometheus.CounterOpts{
+       Name: "aws_url_error_counter",       
+   },
+)
+
+var awsConfigErrCounter = prometheus.NewCounter(
+   prometheus.CounterOpts{
+       Name: "aws_config_error_counter",       
+   },
+)
+
+func init() {
+    // Register Prometheus metrics collectors
+    prometheus.MustRegister(awsAuthErrCounter)
+    prometheus.MustRegister(awsUrlErrCounter)
+	prometheus.MustRegister(awsConfigErrCounter)
+}
 
 type CodeArtifactAuthInfoStruct struct {
 	Url                string
@@ -27,6 +53,7 @@ func Authenticate() {
 	// Authenticate against CodeArtifact
 	cfg, cfgErr := config.LoadDefaultConfig(context.TODO())
 	if cfgErr != nil {
+		awsConfigErrCounter.Inc()
 		log.Fatalf("unable to load SDK config, %v", cfgErr)
 	}
 	svc := codeartifact.NewFromConfig(cfg)
@@ -61,6 +88,7 @@ func Authenticate() {
 	}
 	authResp, authErr := svc.GetAuthorizationToken(context.TODO(), authInput)
 	if authErr != nil {
+		awsAuthErrCounter.Inc()
 		log.Fatalf("unable to get authorization token, %v", authErr)
 	}
 	log.Printf("Authorization successful")
@@ -81,7 +109,8 @@ func Authenticate() {
 
 	urlResp, urlErr := svc.GetRepositoryEndpoint(context.TODO(), urlInput)
 	if urlErr != nil {
-		log.Fatalf("unable to get repository endpoint, %v", urlErr)
+		awsUrlErrCounter.Inc()
+		log.Fatalf("unable to get repository endpoint, %v", urlErr)		
 	}
 	CodeArtifactAuthInfo.Url = *urlResp.RepositoryEndpoint
 	mutex.Unlock()
