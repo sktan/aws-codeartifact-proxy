@@ -9,11 +9,17 @@ updates:
     directory: "/cdk" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      cdk-deps:
+        applies-to: version-updates
 
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/src" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      src-deps:
+        applies-to: version-updates
 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/" # Location of package manifests
@@ -21,9 +27,12 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "devcontainers" # See documentation for possible values
-    directory: "/.devcontainer" # Location of package manifests
+    directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      devcontainers-deps:
+        applies-to: version-updates
 
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
