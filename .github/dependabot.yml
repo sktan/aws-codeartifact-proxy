@@ -12,6 +12,8 @@ updates:
     groups:
       cdk-deps:
         applies-to: version-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/src" # Location of package manifests
@@ -20,6 +22,8 @@ updates:
     groups:
       src-deps:
         applies-to: version-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/" # Location of package manifests
@@ -33,6 +37,8 @@ updates:
     groups:
       devcontainers-deps:
         applies-to: version-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
