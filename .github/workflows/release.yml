@@ -19,7 +19,7 @@ jobs:
       - name: Build arm64
         run: cd src && CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags '-extldflags "-static"' -tags timetzdata -o ../aws-codeartifact-proxy-arm64
       - name: Github Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             aws-codeartifact-proxy-x86_64
