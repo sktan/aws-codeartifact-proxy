@@ -26,12 +26,12 @@
         },
         "aws-cdk-lib": {
             "hashes": [
-                "sha256:82da916b55070f7fc8a11a28f47afb6f7e34b452be7d7a4d7fdbf8e4e77ea768",
-                "sha256:f609a88a6fe252dc5a0629393567942ec7f0c2aef1ef350c911cd9165b50bee5"
+                "sha256:123f67d01b13410a1c4192adf330ea87902b40d0c9a6cbda325aeb2ec7358a87",
+                "sha256:e6048424bcece8c2588ed08261454a7610904977cbab01952d7f523966f45090"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.9'",
-            "version": "==2.215.0"
+            "version": "==2.217.0"
         },
         "aws-cdk.asset-awscli-v1": {
             "hashes": [
@@ -51,11 +51,11 @@
         },
         "aws-cdk.cloud-assembly-schema": {
             "hashes": [
-                "sha256:230d9e99d1747f6683096d8fbdc4c275a02ed877896a348a07056436568dee5a",
-                "sha256:ee8f0362b29835dfd0155ef5f3d3546cf4c9e3ec4e7c2f21329894cedf5c38b0"
+                "sha256:334d69fcbf6d77c3f91c389e534de5825e742a4fa630534e6ac53aeda33b25e4",
+                "sha256:64cb9beff9677578ff63f50403aeeb0530c9ea27db3121a57247f1a6fa1afeb2"
             ],
             "markers": "python_version ~= '3.9'",
-            "version": "==48.9.0"
+            "version": "==48.11.0"
         },
         "cattrs": {
             "hashes": [
