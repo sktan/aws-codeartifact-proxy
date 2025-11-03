@@ -28,11 +28,6 @@
         "CODEARTIFACT_REPO": "sandbox"
     },
     "features": {
-        // Used build and deploy docker containers
-        "docker-in-docker": {
-            "version": "latest",
-            "moby": true
-        },
         // Used for AWS CLI
         "aws-cli": "latest",
         // Testing out the proxy mechanism and for deploying via CDK
