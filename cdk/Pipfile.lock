@@ -26,20 +26,20 @@
         },
         "aws-cdk-lib": {
             "hashes": [
-                "sha256:dc31ebff30145fda226849a7cf46aeace6347c000b662091488c19effd7d5d37",
-                "sha256:f55e76cc53d1aa64e22c120f75da1a9680541e76c846668090838e42d9885eb0"
+                "sha256:6602d6678597c649d80ff884972c3fa67a98fd6cacb56adcb77cd8fc4a735d43",
+                "sha256:cef10c71e1575196df277fdac57c54010a8d28d77646da09200b1d1cb3625f8e"
             ],
             "index": "pypi",
             "markers": "python_version ~= '3.9'",
-            "version": "==2.235.0"
+            "version": "==2.238.0"
         },
         "aws-cdk.asset-awscli-v1": {
             "hashes": [
-                "sha256:cde1bf3ad6bd0164f031a452b115b8679524feaa892b3c7cb8ab877f81d0325a",
-                "sha256:d87d2a2ca1466a8ac494f5dc170d2a15678f92aeae3015bc39dbaf19830a5dd2"
+                "sha256:185150757d4216ea982d7b35596de5b3d767776be00cd78cacce02eaa08f8851",
+                "sha256:657605260ace055fac4ae30a6fb84a80504a6e24ce0b1d278913d4db4bafa266"
             ],
             "markers": "python_version ~= '3.9'",
-            "version": "==2.2.261"
+            "version": "==2.2.263"
         },
         "aws-cdk.asset-node-proxy-agent-v6": {
             "hashes": [
@@ -92,11 +92,11 @@
         },
         "jsii": {
             "hashes": [
-                "sha256:37664c25ac8dfaf6c1bab214ff58eec62d515e70311c349240b43bdd733beccb",
-                "sha256:895b1f27f67e1fac3797abeeeb0ded0e1a64a155a32e1547174735d293eca0cb"
+                "sha256:0bb3d5423fd62a499f9ce83e98668b48424ac6ef39472bff90cdf4650aa41b41",
+                "sha256:5e4739843aab3af25472490a05a271cf7d53f01a6d46167ab0f1f2cff3a8df95"
             ],
             "markers": "python_version ~= '3.9'",
-            "version": "==1.125.0"
+            "version": "==1.126.0"
         },
         "publication": {
             "hashes": [
