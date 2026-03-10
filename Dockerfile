@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine as app-builder
+FROM golang:1.26-alpine as app-builder
 WORKDIR /go/src/app
 
 RUN echo "nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin" > /etc/passwd.nobody
