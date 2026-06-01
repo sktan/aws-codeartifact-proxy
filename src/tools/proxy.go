@@ -80,6 +80,8 @@ func ProxyResponseHandler() func(*http.Response) error {
 			}
 		}
 
+		// Respond to only requests that respond with JSON
+		// There might eventually be additional headers i don't know about?
 		if !strings.Contains(contentType, "application/json") && !strings.Contains(contentType, "application/vnd.npm.install-v1+json") {
 			return nil
 		}
