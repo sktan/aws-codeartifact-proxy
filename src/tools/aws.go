@@ -20,6 +20,20 @@ type CodeArtifactAuthInfoStruct struct {
 
 var CodeArtifactAuthInfo = &CodeArtifactAuthInfoStruct{}
 
+// IsTokenValid reports whether we currently hold a CodeArtifact authorization
+// token that has not yet expired. Tokens are requested with a 3600 second (60
+// minute) duration in Authenticate.
+func (c *CodeArtifactAuthInfoStruct) IsTokenValid() bool {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	if c.AuthorizationToken == "" {
+		return false
+	}
+
+	return time.Since(c.LastAuth).Minutes() < 60
+}
+
 // Authenticate performs the authentication against CodeArtifact and caches the credentials
 func Authenticate() {
 	log.Printf("Authenticating against CodeArtifact")

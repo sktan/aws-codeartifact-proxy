@@ -124,6 +124,20 @@ func ProxyResponseHandler() func(*http.Response) error {
 
 }
 
+// HealthCheckHandler responds to health probes without proxying to
+// CodeArtifact. It returns 200 OK when a valid authorization token is held and
+// 503 Service Unavailable otherwise, so orchestrators can tell when the proxy
+// is unable to serve requests.
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	if CodeArtifactAuthInfo.IsTokenValid() {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "OK")
+	} else {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprintln(w, "CodeArtifact authorization token is not valid")
+	}
+}
+
 // ProxyInit initialises the CodeArtifact proxy and starts the HTTP listener
 func ProxyInit() {
 	remote, err := url.Parse(CodeArtifactAuthInfo.Url)
@@ -138,7 +152,25 @@ func ProxyInit() {
 
 	proxy.ModifyResponse = ProxyResponseHandler()
 
-	http.HandleFunc("/", ProxyRequestHandler(proxy))
+	proxyHandler := ProxyRequestHandler(proxy)
+
+	// The health check endpoint is opt-in: it is only enabled when
+	// HEALTHCHECK_PATH is set (e.g. /actuator/health). When enabled, a GET on
+	// that path is served as a health check rather than being proxied. All
+	// other requests (including non-GET requests to the health path) are
+	// proxied as usual.
+	if healthPath, ok := os.LookupEnv("HEALTHCHECK_PATH"); ok && healthPath != "" {
+		log.Printf("Health check enabled on GET %s", healthPath)
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == healthPath && r.Method == http.MethodGet {
+				HealthCheckHandler(w, r)
+				return
+			}
+			proxyHandler(w, r)
+		})
+	} else {
+		http.HandleFunc("/", proxyHandler)
+	}
 	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		panic(err)
