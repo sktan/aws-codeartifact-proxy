@@ -42,6 +42,7 @@ Configuration is done via Environment Variables:
 | `CODEARTIFACT_TYPE`   | No         | Use one of the following: pypi, npm, maven |
 | `CODEARTIFACT_OWNER`  | No         | The AWS Account ID of the CodeArtifact Owner (if it's your own account, it can be empty) |
 | `LISTEN_PORT`         | No         | Port on which the proxy should listen.  Defaults to 8080 |
+| `HEALTHCHECK_PATH`    | No         | Enables a health check endpoint on the given path (e.g. `/actuator/health`) instead of proxying it. Unset by default, which disables the health check entirely |
 
 By default, the proxy will choose to use the Pypi as its type.
 
@@ -52,6 +53,27 @@ Once you have started the proxy with valid AWS credentials (this uses the [defau
 2022/04/03 04:41:53 Authorization successful
 2022/04/03 04:41:53 Requests will now be proxied to https://sktansandbox-1234567890.d.codeartifact.ap-southeast-2.amazonaws.com/pypi/sandbox/
 ```
+
+### Health Check
+
+Setting the `HEALTHCHECK_PATH` environment variable enables a lightweight health
+check on that path which does **not** proxy to CodeArtifact. It returns `200 OK`
+when the proxy holds a valid (unexpired) CodeArtifact authorization token, and
+`503 Service Unavailable` otherwise. This makes it suitable for load balancer /
+container orchestrator health probes.
+
+```
+$ HEALTHCHECK_PATH=/actuator/health ... # start the proxy
+$ curl -i http://localhost:8080/actuator/health
+HTTP/1.1 200 OK
+...
+
+OK
+```
+
+When `HEALTHCHECK_PATH` is unset the health check is disabled and all requests
+are proxied. While enabled, all other requests (and any non-GET request to the
+health path) are proxied to CodeArtifact as normal.
 
 ### Docker Examples
 
