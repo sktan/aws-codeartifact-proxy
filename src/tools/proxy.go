@@ -4,7 +4,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
+
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -80,44 +80,35 @@ func ProxyResponseHandler() func(*http.Response) error {
 			}
 		}
 
-		// Do some quick fixes to the HTTP response for NPM install requests
-		// Also support for pnpm and bun
-		if strings.HasPrefix(r.Request.UserAgent(), "npm") ||
-			strings.HasPrefix(r.Request.UserAgent(), "pnpm") ||
-			strings.HasPrefix(r.Request.UserAgent(), "yarn") ||
-			strings.HasPrefix(r.Request.UserAgent(), "Bun") {
-
-			// Respond to only requests that respond with JSON
-			// There might eventually be additional headers i don't know about?
-			if !strings.Contains(contentType, "application/json") && !strings.Contains(contentType, "application/vnd.npm.install-v1+json") {
-				return nil
-			}
-
-			var body io.ReadCloser
-
-			if r.Header.Get("Content-Encoding") == "gzip" {
-				body, _ = gzip.NewReader(r.Body)
-				r.Header.Del("Content-Encoding")
-			} else {
-				body = r.Body
-			}
-
-			// replace any instances of the CodeArtifact URL with the local URL
-			oldContentResponse, _ := ioutil.ReadAll(body)
-			oldContentResponseStr := string(oldContentResponse)
-
-			mutex.Lock()
-			resolvedHostname := strings.Replace(CodeArtifactAuthInfo.Url, u.Host, hostname, -1)
-			newUrl := fmt.Sprintf("%s://%s/", originalUrl.Scheme, originalUrl.Host)
-
-			newResponseContent := strings.Replace(oldContentResponseStr, resolvedHostname, newUrl, -1)
-			newResponseContent = strings.Replace(newResponseContent, CodeArtifactAuthInfo.Url, newUrl, -1)
-			mutex.Unlock()
-
-			r.Body = ioutil.NopCloser(strings.NewReader(newResponseContent))
-			r.ContentLength = int64(len(newResponseContent))
-			r.Header.Set("Content-Length", strconv.Itoa(len(newResponseContent)))
+		// Respond to only requests that respond with JSON
+		// There might eventually be additional headers i don't know about?
+		if !strings.Contains(contentType, "application/json") && !strings.Contains(contentType, "application/vnd.npm.install-v1+json") {
+			return nil
 		}
+
+		var body io.ReadCloser
+		if r.Header.Get("Content-Encoding") == "gzip" {
+			body, _ = gzip.NewReader(r.Body)
+			r.Header.Del("Content-Encoding")
+		} else {
+			body = r.Body
+		}
+
+		// replace any instances of the CodeArtifact URL with the local URL
+		oldContentResponse, _ := io.ReadAll(body)
+		oldContentResponseStr := string(oldContentResponse)
+
+		mutex.Lock()
+		resolvedHostname := strings.ReplaceAll(CodeArtifactAuthInfo.Url, u.Host, hostname)
+		newUrl := fmt.Sprintf("%s://%s/", originalUrl.Scheme, originalUrl.Host)
+
+		newResponseContent := strings.ReplaceAll(oldContentResponseStr, resolvedHostname, newUrl)
+		newResponseContent = strings.ReplaceAll(newResponseContent, CodeArtifactAuthInfo.Url, newUrl)
+		mutex.Unlock()
+
+		r.Body = io.NopCloser(strings.NewReader(newResponseContent))
+		r.ContentLength = int64(len(newResponseContent))
+		r.Header.Set("Content-Length", strconv.Itoa(len(newResponseContent)))
 
 		return nil
 	}
