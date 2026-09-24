@@ -26,20 +26,20 @@
         },
         "aws-cdk-lib": {
             "hashes": [
-                "sha256:a8d7928c7a01c25f6cb85c98e465df6ffd2b9e696bdb256257eeca2157c80609",
-                "sha256:fc87a36758c93c95845bb4889c21a899eb639b78e43d09d965d9d924233e60f6"
+                "sha256:65d8372d3ce23d2517867f12f0b9a684eff933f0c98357153a359650ca0e8865",
+                "sha256:a6183be9237fed851b52dce42196adea65ee23437d95e1765d46dd6247d02d23"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==2.263.0"
+            "version": "==2.265.0"
         },
         "aws-cdk.asset-awscli-v1": {
             "hashes": [
-                "sha256:24139da0eb1be59f8cfda22c6343d51e8d50bb89b5052b049cfab92683de7790",
-                "sha256:f86e61653927f77fb235b5ec148c955c610117430c869d182c8b20f7e07e2df2"
+                "sha256:01cfb33e2913df2d63448b0954ea4ed1bcb1d064514b4b7aa266eda915e8ebfc",
+                "sha256:06da203eeaecbbbf5f1ecd3b12140104e6a59b6a7f6182cfbda5c5deda4b6344"
             ],
-            "markers": "python_version ~= '3.10'",
-            "version": "==2.2.282"
+            "markers": "python_version >= '3.10'",
+            "version": "==2.2.292"
         },
         "aws-cdk.asset-node-proxy-agent-v6": {
             "hashes": [
@@ -51,11 +51,11 @@
         },
         "aws-cdk.cloud-assembly-schema": {
             "hashes": [
-                "sha256:6ae07befea2da93a7602552b88c32c1c0f49efc62a7bec7640c6c2237d9bed8a",
-                "sha256:fa311904a7c5b34c40b18f13347ab21eecf951c2826079f6b4186a85e70e4d9f"
+                "sha256:af0dc2977be10c6aa9c05dcf96529f33e4aaf826ec1edac237790404b05ddbe0",
+                "sha256:b385c8f8339df2b8675a85bc84dc61bd815a44ef16dcc690f7efa98d3a5dd3a2"
             ],
             "markers": "python_version >= '3.10'",
-            "version": "==54.16.0"
+            "version": "==54.19.0"
         },
         "cattrs": {
             "hashes": [
